@@ -12,6 +12,96 @@ module.exports = {
     publicPath: "./", 
     // 输出文件目录
     outputDir: 'dist',
+    // 放置生成的静态资源(js、 css、 img、fonts)的(相对于 outputDir的目录)
+    // assetsDir: './',
+    // 指定生成的 index.html的输出路径(相对于 outputDir).也可以是一个绝对路径
+    // indexPath: './',
+    // eslint-loader是否保存时检查
+    lintOnSave:true,
+    devServer:{
+        // 开启压缩
+        compress: false,
+        proxy: {
+            '/apply': {
+                target: 'http://www.study.com', //需要代理的服务器
+                ws: true,                       //websocket与后台形成一个通道 持续的
+                changeOrigin: true,             //是否荀彧跨域
+                pathRewrite: {                  //重写
+                    '/apply':'/'
+                }
+            }
+        }
+    },
+    // Css相关配置
+    css: {
+        // 是否使用css分离插件 ExtractTextPlugin
+        extract: true,
+        // sourceMaps是什么(主要是方便开发按人员的错误定位) 若果为true打包时间将会大幅度加长
+        sourceMap: false,
+        // css预设器配置项
+        loaderOptions: {
+            sass: {
+                data:`
+                    @import "@/assets/common/index.css";
+                `
+            }
+        },
+        // 启动css modules for all css / pre-processor files.
+        modules: false,
+    },
+    // webpack配置
+    chainWebpack: config => {
+        // 配置别名 不配置会报错
+        config.resolve.alias
+            .set("@",resolve("src"))
+            .set("@img", reslove("src/assets/img"));
+        // 生产环境配置
+        if(isProduction){
+            // 删除预加载
+            config.plugins.delete('preload');
+            conifg.plugins.delete('prefetch');
+            // 压缩代码
+            conifg.optimization.minimize(true);
+            // 分割代码
+            config.optimization.splitChunks({
+                chunks: 'all'
+            })
+            // 生产环境注入cdn
+        }
+    },
+    configureWebpack: config => {
+        if(isProduction){
+            // 用cdn方式引入
+
+            // 为生产环境修改配置...
+            config.plugins.push(
+                // 为生产环境自动删除console
+                new UglifyJsPlugin({
+                    uglifyOptions: {
+                        compress: {
+                            // warings: false,
+                            drop_debugger: true,
+                            drop_console: true,
+                        }
+                    },
+                    // 是否生成sourceMap
+                    sourceMap: false,
+                    // 使用多进程并行运行来提高构建速度
+                    parallel: true
+                })
+            );
+        }else{
+            // 为开发环境修改配置
+            // 也可以为测试环境配置
+        }
+    },
+    // 生产环境是否生成sourceMap
+    productionSourceMap: false,
+    // 启用并优化，默认并发运行数('os').cpus().length - 1 显著加速构建
+    parallel: require('os').cpus().length -1,
+
+
+
 }
 
 
