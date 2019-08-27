@@ -42,6 +42,16 @@ exports.cssLoaders = function (options) {
       })
     }
 
+    if(loader == 'less'){
+      loaders.push({
+          loader: 'style-resources-loader',
+          options: {
+              patterns: path.resolve(__dirname, '../src/assets/common/common.less')
+          }
+      })
+    }
+
+
     // Extract CSS when that option is specified
     // (which is the case during production build)
     if (options.extract) {
